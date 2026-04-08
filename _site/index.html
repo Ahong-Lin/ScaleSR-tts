@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="A study on the scaling effect of the inference-time computation, investigate the compute-optimal inference method.">
+  <meta name="keywords" content="Compute Optimal Inference, AI for Math, Tree Search">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inference Scaling Laws: An Empirical Analysis of Compute-Optimal Inference for Problem-Solving with Language Models</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  
+</head>
+<body>
+
+
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title"><span style="color: orangered;">Inference Scaling Laws</span>: An Empirical Analysis of Compute-Optimal Inference for Problem-Solving with Language Models</h1>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                <a href="https://thu-wyz.github.io/">Yangzhen Wu</a><sup>1</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://www.cs.cmu.edu/~zhiqings/">Zhiqing Sun</a><sup>2</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://lithiumda.github.io/">Shanda Li</a><sup>2</sup>,
+              </span>
+              <span class="author-block">
+                <a href="https://wellecks.com/">Sean Welleck</a><sup>2</sup>,
+              </span>
+              <span class="author-block">
+                <a href="http://www.cs.cmu.edu/~yiming/">Yiming Yang</a><sup>2</sup>,
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>Tsinghua University</span>
+            </div>
+  
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>2</sup>Carnegie Mellon University</span>
+            </div>
+  
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/abs/2408.00724"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://github.com/thu-wyz/rebase"
+                     class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                        <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                    </a>
+                </span>
+                
+              </div>
+  
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              While the scaling laws of large language models (LLMs) training have been extensively studied, optimal inference configurations of LLMs remain underexplored. 
+We study <b>inference scaling laws</b> and <b>compute-optimal inference</b>, focusing on the trade-offs between model sizes and generating additional tokens with different inference strategies. As a first step towards understanding and designing compute-optimal inference methods, we studied cost-performance trade-offs for inference strategies such as greedy search, majority voting, best-of-$n$, weighted voting, and two different tree search algorithms, using different model sizes and compute budgets. Our findings indicate smaller models (e.g., Llemma-7B) can outperform larger models given the same computation budgets, and that smaller models paired with advanced inference algorithms yield Pareto-optimal cost-performance trade-offs. For instance, the Llemma-7B model, equipped with our novel tree search algorithm, consistently outperforms Llemma-34B with standard majority voting on the MATH benchmark across all FLOPs budgets. We hope these findings contribute to a broader understanding of inference scaling laws for LLMs.
+            </p>
+        </div>
+        </div>
+      </div>
+      <!--/ Abstract. -->
+  
+    </div>
+  </section>
+
+
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Scaling Law. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Inference-compute Scaling</h2>
+          <p style="text-align: left; font-size: 20px;">
+            More model parameters may lead to high performance on various tasks, but what about scaling the number of decoding tokens in inference? By measuring the amount of computation in FLOPs and studying model performance across different sizes and inference strategies as computation scales up, we can gain a deeper understanding of the effect of inference scaling.
+          </p>
+          <hr style="margin: 20px 0;">
+          <figure style="text-align: left;">
+            <img src="./static/images/inference_scaling.png" class="interpolation-image" alt="" style="display: block; margin-left: auto; margin-right: auto"/>
+            <figcaption> The error rate versus computation budget(in Flops), we evaluate the Pythia models on the GSM8k dataset accross different model sizes.
+            </figcaption>
+          </figure>
+          <figure style="text-align: left; margin-bottom: 25px;">
+            <img src="./static/images/scaling.png" class="interpolation-image" alt="" style="display: block; margin-left: auto; margin-right: auto"/>
+            <figcaption>
+              The <em>right</em> panel shows the model performances given inference FLOPs budgets. 
+              In particular, the three stars highlight the optimal model size under \(10^{12}\), \(10^{13}\), and \(10^{14}\) FLOPs, indicating that the optimal model size can vary given different budgets.
+            </figcaption>
+          </figure>
+          <p style="text-align: left; font-size: 20px;">
+            <b>Key findings:</b>
+           <ul style="list-style-type: square; margin-top: 20px;text-align: left; font-size: 18px;">
+           <li>Scaling inference compute by sampling more solutions leads to growing task performance.</li>
+           <li>Across all scenarios, there is an eventual point at which the accuracy will reach a plateau, indicating that additional computational resources yield diminishing returns.</li>
+           <li>The ideal model size varies depending on the available computational budget. Notably, smaller models tend to perform better when the compute budget is constrained.</li>
+           <li>We also provide theoretical analysis which shows the upperbound and convergence rate in our paper, find more infomation in our paper!</li>
+         </ul>
+
+         
+        </div>
+      </div>
+      <!--/ Scaling Law. -->
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Compute Optimal Inference. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Compute-optimal Inference</h2>
+          <p style="text-align: left; font-size: 20px;">In our paper, we also define the problem of compute-optimal inference, investigate the inference strategies that achieve high performance with a fixed compute budget. </p>
+          <figure style="text-align: left; margin-bottom: 50px;">
+            <img src="./static/images/compute-optimal.png" class="interpolation-image" alt="" style="display: block; margin-left: auto; margin-right: auto"/>
+            <br />
+            <figcaption>
+            comparison of compute-optimal inference and compute-optimal training
+           </figcaption>
+          </figure>
+          <figure style="text-align: left; margin-bottom: 50px;">
+          <img src="./static/images/gsm8k.png" class="interpolation-image" alt="" style="display: block; margin-left: auto; margin-right: auto"/>
+          <br />
+          <figcaption>
+          rebase and sampling results on GSM8k
+          </figcaption>
+         </figure>
+         <p style="text-align: left; font-size: 20px;">We introduce REward BAlanced SEarch (REBASE) which is Pareto optimal compared to sampling. We have the following findings:
+         </p>
+          <ul style="list-style-type: square; margin-top: 20px;text-align: left; font-size: 18px;">
+          <li>Sophisticated inference strategy like REBASE is compute-optimal.</li>
+          <li>Smaller models equipped with advanced inference strategy outperforms larger ones.</li>
+        </ul>
+        </div>
+      </div>
+      <!--/ Compute-opitimal Inference. -->
+    </div>
+  </section>
+  <section class="section">
+    <div class="container is-max-desktop">
+    <h2 class="title is-3">Citation</h2>
+    <p style="text-align: left; font-size: 20px;">If you find our paper useful, please consider cite us</p>
+    <pre>
+@misc{wu2024inferencescalinglawsempirical,
+  title={Inference Scaling Laws: An Empirical Analysis of Compute-Optimal Inference for Problem-Solving with Language Models}, 
+  author={Yangzhen Wu and Zhiqing Sun and Shanda Li and Sean Welleck and Yiming Yang},
+  year={2024},
+  eprint={2408.00724},
+  archivePrefix={arXiv},
+  primaryClass={cs.AI},
+  url={https://arxiv.org/abs/2408.00724}, 
+}
+    </pre>
+  </div>
+  </section>
+
+
+
+
+
+
+
+
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              Website template borrowed from <a
+                href="https://github.com/nerfies/nerfies.github.io">NeRFies</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+    content="A study on the scaling effect of the inference-time computation, investigate the compute-optimal inference method.">
+  <meta name="keywords" content="Compute Optimal Inference, AI for Math, Tree Search">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Test-Time Scaling for Scientific Equation Discovery</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .conference-badge {
+      display: inline-block;
+      padding: 0.5rem 1.25rem;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #4b5563;
+      margin-bottom: 2rem;
+    }
+
+    .finding-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      height: 100%;
+      text-decoration: none !important;
+      display: block;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .finding-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+      border-color: #1A50A1;
+    }
+
+    .finding-number {
+      font-family: 'JetBrains Mono', monospace;
+      color: #1A50A1;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .finding-title {
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #111827;
+      line-height: 1.4;
+      margin-bottom: 0.4rem;
+    }
+
+    .finding-subtitle {
+      color: #6b7280;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+
+
+
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-1 publication-title">
+              <span style="color: #19124D;">T</span><span style="color: #1A50A1;">e</span><span
+                style="color: #00869C;">s</span><span style="color: #1EB15D;">t</span>-<span
+                style="color: #93CA26;">T</span><span style="color: #F3BA00;">i</span><span
+                style="color: #EB5D04;">m</span><span style="color: #BE1525;">e</span> Scaling for
+              Scientific Equation Discovery
+            </h1>
+            <p class="subtitle is-3" style="margin-top: 0.5rem; margin-bottom: 1.5rem;">
+              Balancing Exploration and Exploitation in Compute Allocation
+            </p>
+            <div class="conference-badge">arXiv 2026</div>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">
+                Haowei Lin<sup>*</sup>,
+              </span>
+              <span class="author-block">
+                Hubert Lim<sup>*</sup>,
+              </span>
+              <span class="author-block">
+                Xiangyu Wang,
+              </span>
+              <span class="author-block">
+                Letian Huang,
+              </span>
+              <span class="author-block">
+                Di He
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Peking University</span>
+            </div>
+
+            <div class="is-size-6 publication-authors">
+              <span class="author-block"><sup>*</sup>Equal contribution</span>
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF Link. -->
+                <span class="link-block">
+                  <a href="#" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                    </span>
+                    <span>Paper</span>
+                  </a>
+                </span>
+                <!-- Code Link. -->
+                <span class="link-block">
+                  <a href="https://tts4sr.github.io" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+                <!-- HuggingFace Link. -->
+                <span class="link-block">
+                  <a href="https://huggingface.co/datasets/pkuHaowei/tts_llmsr_data"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fas fa-database"></i>
+                    </span>
+                    <span>HuggingFace</span>
+                  </a>
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <!-- Abstract. -->
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Abstract</h2>
+          <div class="content has-text-justified">
+            <p>
+              Test-time scaling (TTS) improves language model reasoning by using additional inference-time compute. Most
+              prior work focused on closed-ended tasks with known answers, such as mathematics and code generation.
+              Scientific discovery is different because it involves a much larger, open-ended search space. Prior
+              research has largely treated TTS as a way to improve performance with more compute or to help smaller
+              models approach the performance of larger ones. We argue instead that open-ended scientific discovery
+              requires expanding the TTS design space itself. Under a fixed compute budget, the central challenge is to
+              balance exploration and exploitation. To study this, we formulate LLM-driven scientific discovery as an
+              iterative search process that unifies common TTS methods, including Best-of-N, sequential refinement, tree
+              search, and recent evolution-based systems. To isolate the role of compute allocation from that of complex
+              designs (e.g., prompt engineering), we compare different allocation strategies under minimal control
+              flows. On automated equation discovery tasks, we find that search width is the most important allocation
+              parameter. The optimal width increases with the compute budget according to a empirical law. Optimizing
+              compute allocation also improves wall-clock efficiency by increasing parallelism and reducing
+              synchronization overhead. These results show that, given a reliable verifier, principled control of
+              exploration and exploitation is key to scaling scientific discovery at test time.
+            </p>
+          </div>
+        </div>
+      </div>
+      <!--/ Abstract. -->
+
+    </div>
+  </section>
+
+
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <hr style="margin: 20px 0;">
+          <h2 class="title is-3 has-text-left">Unified Formulation for TTS Control Flow</h2>
+          <div class="content has-text-justified">
+            <p style="font-size: 20px;">
+              We formulate LLM-driven scientific discovery as a unified search process (sample, generate, evaluate,
+              prune), isolating compute allocation from domain-specific heuristics. Our framework compares simple,
+              highly parallel controllers <b>Parallel Beam Search (PBeam)</b> and <b>Parallel Iterative Expansion
+                (PIE)</b> against common baselines and complex, over-engineered systems. We demonstrate that the success
+              of evolutionary methods often stems from clever compute allocation rather than intricate heuristics. By
+              focusing on a reduced design space of width (\(w\)), branching (\(n\): the number of expanded nodes;
+              \(k\): the number of new expansions for the same node. \(w=n\times k\)), and grouping (\(g\)), we show
+              that minimal control
+              flows can achieve superior performance and efficiency in vast, open-ended scientific search spaces without
+              unnecessary engineering complexity.
+            </p>
+          </div>
+          <figure style="text-align: left; margin-top: 2rem;">
+            <img src="./static/images/fig1.jpg" class="interpolation-image" alt="Unified Search Abstraction"
+              style="display: block; margin-left: auto; margin-right: auto; max-width: 80%;" />
+            <figcaption style="text-align: center; margin-top: 0.5rem;">
+              Top row: classical baselines emphasize only one aspect of compute allocation: Best-of-\(N\) performs
+              purely parallel one-shot sampling (\(T=1\), \(n=1\), \(k\ \text{large}\)), Self-refine performs purely
+              sequential single-chain refinement \((T=N, n=1, k=1)\), and MCTS balances exploration and exploitation
+              through sequential tree expansion but with limited parallelism. Bottom row: hybrid, discovery-oriented
+              methods maintain multiple active candidates and combine branching with pruning. OpenEvolve expands
+              multiple isolated islands in parallel (\(n=\#\text{islands}, k=1\)); Our Parallel Beam Search (PBeam)
+              performs beam-style expansion within each island (\(n\ge1, k\ge1, g\ge1\)); and Parallel Iterative
+              Expansion (PIE) further relaxes strict beam pruning by expanding from the full historical pool.
+            </figcaption>
+          </figure>
+  </section>
+
+  <section class="section" id="finding-1">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <hr style="margin: 20px 0;">
+          <h2 class="title is-3 has-text-left">Key observation: optimal width grows with budget
+          </h2>
+          <figure style="text-align: left; margin-top: 2rem;">
+            <img src="./static/images/fig_width_frontier_main.png" class="interpolation-image"
+              alt="Search Width Frontier"
+              style="display: block; margin-left: auto; margin-right: auto; max-width: 80%;" />
+            <figcaption style="text-align: center; font-size: 0.9rem;">
+              Each curve corresponds to a fixed width w=nk (g=1), with colors transitioning from dark (small w) to
+              bright (large w). Stars mark the best attainable point at each budget over both PBeam and PIE. Crucially,
+              as the compute budget scales, this envelope systematically shifts from darker to brighter curves, showing
+              that larger budgets necessitate wider searches.
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="findings">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <hr style="margin: 20px 0;">
+          <h2 class="title is-2">Findings</h2>
+
+          <br>
+          <!-- Sub-section 1 -->
+          <h4 class="title is-4" style="color: #4a4a4a; font-style: italic;">Optimal width dictates both performance and
+            wall-clock efficiency</h4>
+          <div class="content has-text-justified">
+            <p style="font-size: 20px;">
+              As mentioned above, in our scientific equation discovery benchmark, search width \(w\) emerges as the
+              dominant allocation parameter. Scaling search width not only improves equation discovery
+              accuracy but also significantly enhances wall-clock efficiency. By increasing model inference parallelism,
+              larger widths reduce the sequential refinement rounds needed for a fixed budget. For instance, on the Bio
+              dataset, increasing search width from 1 to 32 reduces total runtime by nearly 80% while simultaneously
+              improving discovery performance.
+            </p>
+
+          </div>
+          <div class="column is-full">
+            <figure>
+              <img src="./static/images/fig_time_frontier.png" alt="Time Frontier"
+                style="display: block; margin: 0 auto; max-width: 80%;" />
+              <figcaption style="text-align: center; font-size: 0.9rem;">Wall-clock frontier under different
+                compute-allocation strategies</figcaption>
+            </figure>
+          </div>
+          <div class="content has-text-justified">
+            <p style="font-size: 20px;">
+              Crucially, scaling width not only improves accuracy but also substantially enhances wall-clock efficiency.
+              Because larger widths increase model inference parallelism and reduce the number of sequential refinement
+              rounds (\(T = N / w\)), the wall-clock Pareto frontier favors moderate-to-large widths. For example, on
+              the Bio dataset, shifting from greedy refinement
+              (\(w=1\)) to width \(32\) reduces runtime by nearly \(80\%\) (from 7622s to 1586s) while
+              simultaneously improving train \(\operatorname{Acc}_{0.1}\) from \(0.965\) to \(0.984\).
+            </p>
+            <p style="font-size: 20px;">
+              We identify a systematic relationship where the optimal search width \(w^*\) grows with the compute
+              budget \(N\) according to a poly-logarithmic hinge-log scaling law:
+              \[w^* = 1 + c[\log_2 N - 1]_+^\alpha\]
+              This empirical law allows practitioners to predict optimal compute allocations across models and domains
+              without exhaustive searches. Specifically, we construct four candidate laws to model the relationship
+              between
+              the optimal
+              width \(w^*\) and the compute budget \(N\) for comparison. The goodness-of-fit of these functions is
+              evaluated in the figure below, and detailed discussions can be found in our paper.
+            </p>
+          </div>
+          <figure style="margin-top: 1rem;">
+            <img src="./static/images/fig_width_fit_compare.png" alt="Scaling Law Fit"
+              style="display: block; margin: 0 auto; max-width: 80%;" />
+            <figcaption style="text-align: center; font-size: 0.9rem;">Comparing candidate scaling laws for the optimal
+              width</figcaption>
+          </figure>
+
+          <br>
+          <hr style="border-top: 1px dashed #ddd;">
+          <br>
+
+          <!-- Sub-section 2 -->
+          <h4 class="title is-4" style="color: #4a4a4a; font-style: italic;">Grouping improves efficiency via reduced
+            synchronization</h4>
+          <div class="content has-text-justified">
+            <p style="font-size: 20px;">
+              While width dictates the primary time--quality trade-off, grouping acts mainly as a secondary systems
+              knob. Holding the total budget \(N\) and the global width \(w\) fixed, increasing the number of groups
+              \(g\) yields a modest wall-clock speedup because synchronization occurs within groups of size \(w/g\)
+              rather than across all \(w\) expansions. This reduces idle time from stragglers and improves hardware
+              utilization when model or verifier latency is heterogeneous. Empirically, moving from \(g=1\) to \(g=8\)
+              yields up to a \(1.075\times\) speedup. By contrast, the effect on search quality is weak and not
+              consistently positive: in our equation-discovery benchmark, island-style isolation does not provide a
+              reliable diversity benefit once width is already chosen. Over-grouping can even hurt, because it reduces
+              both the per-group width \(w/g\) and the per-group budget \(N/g\), pushing each group toward a narrower
+              search regime than the one preferred by the global budget. We therefore treat \(g\) as a throughput
+              parameter rather than a primary search-quality parameter.
+            </p>
+          </div>
+
+          <figure style="margin-top: 1rem;">
+            <img src="./static/images/fig_group_tradeoff.png" alt="Group Tradeoff"
+              style="display: block; margin: 0 auto; max-width: 80%;" />
+            <figcaption style="text-align: center; font-size: 0.9rem;">Effect of group size on performance and
+              wall-clock time</figcaption>
+          </figure>
+
+          <br>
+          <hr style="border-top: 1px dashed #ddd;">
+          <br>
+
+          <!-- Sub-section 3 -->
+          <h4 class="title is-4" style="color: #4a4a4a; font-style: italic;">Other choices are second-order effects</h4>
+          <div class="content has-text-justified">
+            <p style="font-size: 20px;">
+              Once the global width \(w = nk\) is fixed, the remaining design choices have a comparatively minor effect
+              on
+              performance. First, the exact decomposition of \(w\) into \(n\) and \(k\) matters much less than choosing
+              the right
+              width in the first place (see the table).
+            </p>
+            <div class="table-container" style="margin-top: 1.5rem; margin-bottom: 1.5rem;">
+              <table class="table is-striped is-narrow is-hoverable"
+                style="margin: 0 auto; font-size: 16px; border-collapse: collapse; border-bottom: 2px solid #363636;">
+                <caption
+                  style="caption-side: bottom; text-align: center; font-size: 0.9rem; margin-top: 0.5rem; color: #4a4a4a;">
+                  Best \((n, k)\) decomposition within each regime at fixed budget \(N = 128\), width \(w = 32\), and no
+                  grouping (\(g = 1\)).<br>
+                  (Regime definitions:
+                  population-heavy \(\{(32,1),(16,2)\}\),
+                  balanced \(\{(8,4),(4,8)\}\),
+                  and branching-heavy \(\{(2,16),(1,32)\}\)).
+                </caption>
+                <thead style="border-top: 2px solid #363636; border-bottom: 2px solid #363636;">
+                  <tr>
+                    <th style="text-align: center;">Domain</th>
+                    <th style="text-align: center;">Algorithm</th>
+                    <th style="text-align: center;">Regime</th>
+                    <th style="text-align: center;">Best \((n,k)\)</th>
+                    <th style="text-align: center;">Train \(\operatorname{Acc}_{0.1}\)</th>
+                    <th style="text-align: center;">Rel. gap</th>
+                  </tr>
+                </thead>
+                <tbody style="text-align: center;">
+                  <tr>
+                    <td>Bio</td>
+                    <td>PBeam</td>
+                    <td>Population-heavy</td>
+                    <td>\((16,2)\)</td>
+                    <td>0.9816</td>
+                    <td>0.28%</td>
+                  </tr>
+                  <tr>
+                    <td>Bio</td>
+                    <td>PBeam</td>
+                    <td><strong>Balanced</strong></td>
+                    <td><strong>\((4,8)\)</strong></td>
+                    <td><strong>0.9844</strong></td>
+                    <td><strong>0.00%</strong></td>
+                  </tr>
+                  <tr style="border-bottom: 2px solid #363636 !important;">
+                    <td>Bio</td>
+                    <td>PBeam</td>
+                    <td>Branching-heavy</td>
+                    <td>\((1,32)\)</td>
+                    <td>0.9801</td>
+                    <td>0.44%</td>
+                  </tr>
+                  <tr>
+                    <td>Bio</td>
+                    <td>PIE</td>
+                    <td><strong>Population-heavy</strong></td>
+                    <td><strong>\((16,2)\)</strong></td>
+                    <td><strong>0.9804</strong></td>
+                    <td><strong>0.00%</strong></td>
+                  </tr>
+                  <tr>
+                    <td>Bio</td>
+                    <td>PIE</td>
+                    <td>Balanced</td>
+                    <td>\((8,4)\)</td>
+                    <td>0.9612</td>
+                    <td>1.95%</td>
+                  </tr>
+                  <tr style="border-bottom: 2px solid #363636 !important;">
+                    <td>Bio</td>
+                    <td>PIE</td>
+                    <td>Branching-heavy</td>
+                    <td>\((2,16)\)</td>
+                    <td>0.9794</td>
+                    <td>0.10%</td>
+                  </tr>
+                  <tr>
+                    <td>Material</td>
+                    <td>PBeam</td>
+                    <td>Population-heavy</td>
+                    <td>\((16,2)\)</td>
+                    <td>0.9857</td>
+                    <td>1.15%</td>
+                  </tr>
+                  <tr>
+                    <td>Material</td>
+                    <td>PBeam</td>
+                    <td><strong>Balanced</strong></td>
+                    <td><strong>\((8,4)\)</strong></td>
+                    <td><strong>0.9971</strong></td>
+                    <td><strong>0.00%</strong></td>
+                  </tr>
+                  <tr style="border-bottom: 2px solid #363636 !important;">
+                    <td>Material</td>
+                    <td>PBeam</td>
+                    <td>Branching-heavy</td>
+                    <td>\((1,32)\)</td>
+                    <td>0.9876</td>
+                    <td>0.95%</td>
+                  </tr>
+                  <tr>
+                    <td>Material</td>
+                    <td>PIE</td>
+                    <td>Population-heavy</td>
+                    <td>\((32,1)\)</td>
+                    <td>0.9884</td>
+                    <td>0.92%</td>
+                  </tr>
+                  <tr>
+                    <td>Material</td>
+                    <td>PIE</td>
+                    <td>Balanced</td>
+                    <td>\((4,8)\)</td>
+                    <td>0.9975</td>
+                    <td>&lt;0.01%</td>
+                  </tr>
+                  <tr>
+                    <td>Material</td>
+                    <td>PIE</td>
+                    <td><strong>Branching-heavy</strong></td>
+                    <td><strong>\((2,16)\)</strong></td>
+                    <td><strong>0.9976</strong></td>
+                    <td><strong>0.00%</strong></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style="font-size: 20px;">
+
+              Second, the difference between
+              PBeam and PIE is also small: their train \(\operatorname{Acc}_{0.1}\) gap usually stays within ±2% across
+              budgets
+              and widths (see the figure below).
+            </p>
+          </div>
+
+          <figure style="margin-top: 1rem;">
+            <img src="./static/images/fig_algorithm_delta.png" alt="Algorithm Delta"
+              style="display: block; margin: 0 auto; max-width: 80%;" />
+            <figcaption style="text-align: center; font-size: 0.9rem;">PIE - PBeam after optimizing \((n,k)\) inside
+              each algorithm.</figcaption>
+          </figure>
+
+          <div class="content has-text-justified">
+            <p style="font-size: 20px;">
+              We also compare
+              PBeam and PIE against OpenEvolve under strictly matched global budgets. This comparison supports our main
+              claim that, on this benchmark, the dominant gains come from getting the global compute allocation right,
+              whereas additional heuristics such as island engineering, crossover, or specialized prompting appear to be
+              secondary.
+            </p>
+          </div>
+
+          <figure style="margin-top: 1rem;">
+            <img src="./static/images/fig_openevolve_compare.png" alt="OpenEvolve Compare"
+              style="display: block; margin: 0 auto; max-width: 80%;" />
+            <figcaption style="text-align: center; font-size: 0.9rem;">Matched comparison among PBeam, PIE, and
+              OpenEvolve</figcaption>
+          </figure>
+
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column is-full">
+          <div class="box"
+            style="background-color: #f9fbfd; border-left: 8px solid #3273dc; padding: 2.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-radius: 12px;">
+            <h2 class="title is-4" style="margin-top: 0; color: #3273dc;">
+              <span class="icon" style="margin-right: 0.5rem;"><i class="fas fa-lightbulb"></i></span>
+              The Empirical Recipe
+            </h2>
+            <div class="content has-text-justified">
+              <p style="font-size: 20px;">Recommended top-down strategy for deploying external test-time search
+              </p>
+              <ul style="list-style-type: square; font-size: 18px;">
+                <li> Maximize the compute budget by selecting the largest budget \(N\) permitted</li>
+                <li> Determine the optimal width \(w\) using the scaling law as a warm start</li>
+                <li> Set the remaining hyperparameters to moderate values, using balanced
+                  choices such as \(n/w \ge 1/8\), \(k \in [2,8]\), and a mild \(g\)</li>
+                <li>Treat the choice among selection rules (e.g., PIE, PBeam, or more complex systems) as a minor
+                  refinement step</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Citation</h2>
+      <div class="content has-text-justified">
+        <p style="font-size: 20px;">If you find our paper useful, please consider citing us.</p>
+      </div>
+      <pre>
+@article{lin2026testtimescaling,
+  title={Test-Time Scaling for Scientific Equation Discovery}, 
+  author={Haowei Lin and Hubert Lim and Xiangyu Wang and Letian Huang and Di He},
+  year={2026},
+  journal={Preprint}
+}
+    </pre>
+    </div>
+  </section>
+
+
+
+
+
+
+
+
+
+  <footer class="footer">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-8">
+          <div class="content">
+            <p>
+              Website template borrowed from <a href="https://github.com/nerfies/nerfies.github.io">NeRFies</a>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+
+</html>
