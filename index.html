@@ -101,6 +101,40 @@
       font-size: 0.95rem;
       line-height: 1.5;
     }
+
+    .bibtex-container {
+      position: relative;
+    }
+
+    .copy-button {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      padding: 0.5rem 1rem;
+      background: rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #4b5563;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .copy-button:hover {
+      background: rgba(0, 0, 0, 0.1);
+      color: #1A50A1;
+      border-color: rgba(26, 80, 161, 0.2);
+    }
+
+    .copy-button.copied {
+      background: #1EB15D;
+      color: white;
+      border-color: #1EB15D;
+    }
   </style>
 </head>
 
@@ -578,14 +612,22 @@
       <div class="content has-text-justified">
         <p style="font-size: 20px;">If you find our paper useful, please consider citing us.</p>
       </div>
-      <pre>
-@article{lin2026testtimescaling,
+      <div class="bibtex-container">
+        <button class="copy-button" onclick="copyBibtex()">
+          <span class="icon is-small">
+            <i class="far fa-copy"></i>
+          </span>
+          <span>Copy BibTeX</span>
+        </button>
+        <pre id="bibtex-content">@article{lin2026testtimescaling,
   title={Test-Time Scaling for Scientific Equation Discovery}, 
   author={Haowei Lin and Hubert Lim and Xiangyu Wang and Letian Huang and Di He},
   year={2026},
   journal={Preprint}
 }
-    </pre>
+      </pre>
+      </div>
+
     </div>
   </section>
 
@@ -611,6 +653,26 @@
     </div>
   </footer>
 
+  <script>
+    function copyBibtex() {
+      const bibtexText = document.getElementById('bibtex-content').innerText;
+      navigator.clipboard.writeText(bibtexText).then(() => {
+        const button = document.querySelector('.copy-button');
+        const icon = button.querySelector('i');
+        const text = button.querySelector('span:last-child');
+
+        button.classList.add('copied');
+        icon.className = 'fas fa-check';
+        text.innerText = 'Copied!';
+
+        setTimeout(() => {
+          button.classList.remove('copied');
+          icon.className = 'far fa-copy';
+          text.innerText = 'Copy BibTeX';
+        }, 2000);
+      });
+    }
+  </script>
 </body>
 
 </html>
